@@ -76,17 +76,21 @@ function DataInput({ setChartData, setScales }) {
 
   return (
     <>
-      Don't have a CSV file? Try this sample data:
-      <button
-        style={{ margin: '10px', padding: '6px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
-        onClick={async () => {
-          const response = await fetch('/csv-charter/test_file.csv');
-          const text = await response.text();
-          setCsvText(text);
-        }}
-      >
-        Load sample CSV
-      </button>
+    {!csvText && (
+      <div>
+        Don't have a CSV file? Try this sample data:
+        <button
+          style={{ margin: '10px', padding: '6px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+          onClick={async () => {
+            const response = await fetch('/csv-charter/test_file.csv');
+            const text = await response.text();
+            setCsvText(text);
+          }}
+        >
+          Load sample CSV
+        </button>
+      </div>
+    )}
 
       <textarea
         style={{ width: '100%', height: '150px', marginBottom: '10px', fontFamily: 'monospace' }}
