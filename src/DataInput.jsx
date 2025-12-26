@@ -31,7 +31,9 @@ function DataInput({ setData, setXKey, setYKeys }) {
   }
 
   function processData() {
-    localStorage.setItem('csvText', csvText);
+    if (csvText.length < 10000) {
+      localStorage.setItem('csvText', csvText);
+    }
     // If csvText is not from a file, clear fileName
     if (!csvText) {
       setFileName('');
@@ -93,15 +95,21 @@ function DataInput({ setData, setXKey, setYKeys }) {
       </div>
     )}
 
-      <textarea
-        style={{ width: '100%', height: '150px', marginBottom: '10px', fontFamily: 'monospace' }}
-        placeholder="Paste any CSV here... (First column = X-axis)"
-        value={csvText}
-        onChange={(e) => {
-          setCsvText(e.target.value);
-          setFileName('');
-        }}
-      />
+      {(fileName && csvText.length > 100000) ? (
+        <div style={{ color: 'red', marginBottom: '10px' }}>
+          Textarea hidden: CSV data from file "{fileName}" exceeds 100,000 characters.
+        </div>
+      ) : (
+        <textarea
+          style={{ width: '100%', height: '150px', marginBottom: '10px', fontFamily: 'monospace' }}
+          placeholder="Paste any CSV here... (First column = X-axis)"
+          value={csvText}
+          onChange={(e) => {
+            setCsvText(e.target.value);
+            setFileName('');
+          }}
+        />
+      )}
       <button onClick={processData} style={{ padding: '10px 20px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
         Plot Data
       </button>
