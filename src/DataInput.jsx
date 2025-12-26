@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import Papa from 'papaparse';
 
 function DataInput({ setData, setXKey, setYKeys }) {
+  const fileInputRef = useRef(null);
   const [csvText, setCsvText] = useState(() => {
     return localStorage.getItem('csvText') || '';
   });
+  const [fileName, setFileName] = useState('');
+
+  useEffect(() => {
+    processData();
+  }, []);
 
   function setXandYKeys(data) {
     if (data.length === 0) return { chartData: null, options: {} };
@@ -26,6 +32,10 @@ function DataInput({ setData, setXKey, setYKeys }) {
 
   function processData() {
     localStorage.setItem('csvText', csvText);
+    // If csvText is not from a file, clear fileName
+    if (!csvText) {
+      setFileName('');
+    }
 
     Papa.parse(csvText, {
       header: true,
@@ -39,12 +49,33 @@ function DataInput({ setData, setXKey, setYKeys }) {
     });
   }
 
-  useEffect(() => {
-    processData();
-  }, []);
+  function parseFile(e) {
+    var file = e.target.files[0];
+    var fr = new FileReader();
+
+    fr.onload = function(evt) {
+      if (evt.target.readyState === FileReader.DONE) {
+        setCsvText(evt.target.result);
+        setFileName(file.name);
+        // Clear the file input after processing
+        if (fileInputRef.current) {
+          fileInputRef.current.value = '';
+        }
+      }
+    };
+
+    fr.readAsText(file);
+  }
+
 
   return (
     <>
+    <input type="file" id="files" ref={fileInputRef} onChange={parseFile} />
+    {fileName && (
+      <div style={{ margin: '8px 0', color: '#555', fontSize: '0.95em' }}>
+        <strong>Current file:</strong> {fileName}
+      </div>
+    )}
     {!csvText && (
       <div>
         Don't have a CSV file? Try this sample data:
@@ -54,6 +85,7 @@ function DataInput({ setData, setXKey, setYKeys }) {
             const response = await fetch('/csv-charter/test_file.csv');
             const text = await response.text();
             setCsvText(text);
+            setFileName('');
           }}
         >
           Load sample CSV
@@ -65,7 +97,10 @@ function DataInput({ setData, setXKey, setYKeys }) {
         style={{ width: '100%', height: '150px', marginBottom: '10px', fontFamily: 'monospace' }}
         placeholder="Paste any CSV here... (First column = X-axis)"
         value={csvText}
-        onChange={(e) => setCsvText(e.target.value)}
+        onChange={(e) => {
+          setCsvText(e.target.value);
+          setFileName('');
+        }}
       />
       <button onClick={processData} style={{ padding: '10px 20px', backgroundColor: '#2563eb', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
         Plot Data
