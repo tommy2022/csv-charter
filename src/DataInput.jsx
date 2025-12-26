@@ -1,57 +1,27 @@
-import React, { useState } from 'react';
-import { getColor } from './colors';
+import React, { useState, useEffect } from 'react';
 
 import Papa from 'papaparse';
 
-function DataInput({ setChartData, setScales }) {
+function DataInput({ setData, setXKey, setYKeys }) {
   const [csvText, setCsvText] = useState(() => {
     return localStorage.getItem('csvText') || '';
   });
 
-
-  function datasetEntry(data, key, index, axisId) {
-    return {
-      label: key,
-      data: data.map(row => row[key]),
-      borderColor: getColor(index),
-      backgroundColor: getColor(index) + '20',
-      yAxisID: axisId,
-      tension: 0.3,
-    };
-  }
-
-  function buildDatasetsAndScales(data) {
+  function setXandYKeys(data) {
     if (data.length === 0) return { chartData: null, options: {} };
 
     const columns = Object.keys(data[0]);
     const xKey = columns[0];
-    const yKeys = columns.slice(1);
+    const yKeyValues = columns.slice(1);
 
-    const newScales = {
-      x: { title: { display: true, text: xKey } }
-    };
+    const newYKeys = {};
 
-    const datasets = yKeys.map((key, index) => {
-      const axisId = `y${index}`;
-
-      newScales[axisId] = {
-        type: 'linear',
-        display: true,
-        position: index === 0 ? 'left' : 'right',
-        title: { display: true, text: key, color: getColor(index) },
-        grid: { drawOnChartArea: index === 0 },
-      };
-
-      return datasetEntry(data, key, index, axisId);
+    yKeyValues.forEach(key => {
+      newYKeys[key] = true;
     });
 
-    return {
-      chartData: {
-        labels: data.map(row => row[xKey]),
-        datasets: datasets
-      },
-      scales: newScales
-    };
+    setXKey(xKey);
+    setYKeys(newYKeys);
   }
 
   function processData() {
@@ -63,14 +33,13 @@ function DataInput({ setChartData, setScales }) {
       skipEmptyLines: true,
       complete: (results) => {
         const data = results.data;
-        const { chartData, scales } = buildDatasetsAndScales(data);
-        setChartData(chartData);
-        setScales(scales);
+        setData(data);
+        setXandYKeys(data);
       }
     });
   }
 
-  React.useEffect(() => {
+  useEffect(() => {
     processData();
   }, []);
 
