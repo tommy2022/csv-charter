@@ -1,5 +1,7 @@
-import React from 'react';
-import { Line } from 'react-chartjs-2';
+import React, { useState } from 'react';
+import { getColor } from './colors';
+
+import Papa from 'papaparse';
 
 function DataInput({ setChartData, setScales }) {
   const [csvText, setCsvText] = useState(() => {
@@ -74,6 +76,18 @@ function DataInput({ setChartData, setScales }) {
 
   return (
     <>
+      Don't have a CSV file? Try this sample data:
+      <button
+        style={{ margin: '10px', padding: '6px 12px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}
+        onClick={async () => {
+          const response = await fetch('/csv-charter/test_file.csv');
+          const text = await response.text();
+          setCsvText(text);
+        }}
+      >
+        Load sample CSV
+      </button>
+
       <textarea
         style={{ width: '100%', height: '150px', marginBottom: '10px', fontFamily: 'monospace' }}
         placeholder="Paste any CSV here... (First column = X-axis)"

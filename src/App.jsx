@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ChartPlot from './ChartPlot';
-import Papa from 'papaparse';
+import DataInput from './DataInput';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -13,8 +14,6 @@ import {
 } from 'chart.js';
 
 import zoomPlugin from 'chartjs-plugin-zoom';
-
-import { getColor } from './colors';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend, zoomPlugin);
 
